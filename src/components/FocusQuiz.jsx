@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { quizQuestions, resultProfiles } from '../data/quizQuestions';
 import {
-  QuizContainer,
+  ResponsiveQuizContainer,
   ProgressBar,
   Progress,
   Button,
@@ -39,13 +39,13 @@ const FocusQuiz = () => {
 
   const renderQuestion = () => {
     const question = quizQuestions[currentQuestion];
-    console.log('Current question:', question); // Add this debug line
+    console.log('Current question:', question);
     return (
       <>
         <QuestionText>{question.question}</QuestionText>
         <OptionsContainer>
           {question.options.map((option, index) => {
-            console.log('Rendering option:', option); // Add this debug line
+            console.log('Rendering option:', option);
             return (
               <Option
                 key={index}
@@ -65,13 +65,13 @@ const FocusQuiz = () => {
   };
 
   return (
-    <QuizContainer>
+    <ResponsiveQuizContainer>  {/* Changed this line from QuizContainer */}
       <ProgressBar>
         <Progress progress={(currentQuestion / quizQuestions.length) * 100} />
       </ProgressBar>
       <p>Question {currentQuestion + 1} of {quizQuestions.length}</p>
       {renderQuestion()}
-    </QuizContainer>
+    </ResponsiveQuizContainer>
   );
 };
 
