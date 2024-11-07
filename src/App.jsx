@@ -1,8 +1,9 @@
+import React from 'react'
 import FocusQuiz from './components/FocusQuiz'
 
 function App() {
   return (
-    <div>
+    <div className="App">
       <FocusQuiz />
     </div>
   )
