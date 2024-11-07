@@ -1,6 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { quizQuestions, resultProfiles } from '../data/quizQuestions';
-import Results from './Results';
 import {
   ResponsiveQuizContainer,
   ProgressBar,
@@ -10,7 +8,8 @@ import {
   OptionsContainer,
   Option,
   FollowUpContainer,
-  QuestionCounter
+  QuestionCounter,
+  FollowUpInput
 } from './styles/QuizStyles';
 
 const quizData = {
@@ -67,9 +66,12 @@ const FocusQuiz = () => {
   });
   const [showResults, setShowResults] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
+  const [followUpAnswer, setFollowUpAnswer] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
 
   const handleOptionSelect = useCallback((optionIndex) => {
+    if (isAnimating) return;
+
     setIsAnimating(true);
     setSelectedOption(optionIndex);
     
@@ -83,26 +85,41 @@ const FocusQuiz = () => {
         setShowFollowUp(true);
         setIsAnimating(false);
       }, 300);
+    } else {
+      setIsAnimating(false);
     }
-  }, [currentQuestion]);
+  }, [currentQuestion, isAnimating]);
+
+  const handleFollowUpChange = (e) => {
+    setFollowUpAnswer(e.target.value);
+  };
 
   const handleNextQuestion = useCallback(() => {
     if (selectedOption === null) return;
+    if (showFollowUp && !followUpAnswer.trim()) return;
 
     setIsAnimating(true);
     
+    if (followUpAnswer) {
+      setFollowUpAnswers(prev => ({
+        ...prev,
+        [`${currentQuestion}-${selectedOption}`]: followUpAnswer
+      }));
+    }
+
     setTimeout(() => {
       if (currentQuestion < quizData.questions.length - 1) {
         setCurrentQuestion(prev => prev + 1);
         setSelectedOption(null);
         setShowFollowUp(false);
+        setFollowUpAnswer('');
       } else {
         calculateFinalScore();
         setShowResults(true);
       }
       setIsAnimating(false);
     }, 300);
-  }, [currentQuestion, selectedOption]);
+  }, [currentQuestion, selectedOption, followUpAnswer, showFollowUp]);
 
   const calculateFinalScore = useCallback(() => {
     const newScores = Object.entries(answers).reduce((acc, [questionIndex, answerIndex]) => {
@@ -130,9 +147,32 @@ const FocusQuiz = () => {
     setScores(newScores);
   }, [answers]);
 
+  const renderFollowUp = () => {
+    if (!showFollowUp) return null;
+
+    return (
+      <FollowUpContainer>
+        <QuestionText>
+          {quizData.questions[currentQuestion].followUps[selectedOption]}
+        </QuestionText>
+        <FollowUpInput
+          type="text"
+          value={followUpAnswer}
+          onChange={handleFollowUpChange}
+          placeholder="Type your answer here..."
+        />
+      </FollowUpContainer>
+    );
+  };
+
   const renderQuestion = () => {
     if (showResults) {
-      return <Results scores={scores} />;
+      return (
+        <div>
+          <h2>Your Results</h2>
+          <pre>{JSON.stringify(scores, null, 2)}</pre>
+        </div>
+      );
     }
 
     const question = quizData.questions[currentQuestion];
@@ -147,23 +187,17 @@ const FocusQuiz = () => {
             <Option
               key={index}
               selected={selectedOption === index}
-              onClick={() => !isAnimating && handleOptionSelect(index)}
+              onClick={() => handleOptionSelect(index)}
               disabled={isAnimating}
             >
               {option}
             </Option>
           ))}
         </OptionsContainer>
-        {showFollowUp && (
-          <FollowUpContainer>
-            <QuestionText>
-              {question.followUps[selectedOption]}
-            </QuestionText>
-          </FollowUpContainer>
-        )}
+        {renderFollowUp()}
         <Button 
           onClick={handleNextQuestion}
-          disabled={selectedOption === null || isAnimating}
+          disabled={selectedOption === null || isAnimating || (showFollowUp && !followUpAnswer.trim())}
         >
           {currentQuestion === quizData.questions.length - 1 ? 'See Results' : 'Continue →'}
         </Button>

@@ -29,6 +29,25 @@ export const ProgressBar = styled.div`
   margin-bottom: 2rem;
 `;
 
+export const FollowUpInput = styled.input`
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-top: 10px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+  }
+
+  &::placeholder {
+    color: #999;
+  }
+`;
 export const Progress = styled.div`
   width: ${props => props.progress}%;
   height: 100%;
